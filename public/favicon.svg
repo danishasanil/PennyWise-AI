@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="coinGrad" x1="10" y1="12" x2="38" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#064E3B" />
+    </linearGradient>
+    <linearGradient id="growthGrad" x1="8" y1="40" x2="38" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#064E3B" />
+      <stop offset="50%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+    <linearGradient id="starGrad" x1="31" y1="7" x2="41" y2="17" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6EE7B7" />
+      <stop offset="60%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <!-- Background Squircle for high visibility across light & dark browser tabs -->
+  <rect width="48" height="48" rx="12" fill="#0A2F23" />
+  
+  <!-- Outer Coin Arc -->
+  <path d="M 17 9.5 C 10.5 12.5 6 19 6 26.5 C 6 36.16 13.84 44 23.5 44 C 33.16 44 41 36.16 41 26.5 C 41 22.8 39.8 19.4 37.8 16.5" stroke="url(#coinGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Inner Coin Dashed Minting Line -->
+  <path d="M 19 14.5 C 14.5 17 11.5 21.8 11.5 27.2 C 11.5 34.5 17.2 40.2 24.5 40.2 C 31.8 40.2 37.2 34.5 37.2 27.2 C 37.2 24.8 36.5 22.5 35.2 20.5" stroke="#34D399" stroke-width="1.2" stroke-opacity="0.45" stroke-linecap="round" stroke-dasharray="2 3" />
+  
+  <!-- Upward Growth Arrow -->
+  <path d="M 14 33 C 16.5 29 20.5 23 29.5 17.5" stroke="url(#growthGrad)" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M 23 16.5 L 31.5 16 L 31 24.5" stroke="url(#growthGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Center Core Accent -->
+  <circle cx="21" cy="28" r="2" fill="#34D399" />
+  
+  <!-- AI Guiding Sparkle Star -->
+  <path d="M 37 6 C 37 9.2 39.8 12 43 12 C 39.8 12 37 14.8 37 18 C 37 14.8 34.2 12 31 12 C 34.2 12 37 9.2 37 6 Z" fill="url(#starGrad)" />
+</svg>

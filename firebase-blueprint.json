@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile, budget parameters, country, and currency configuration",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "maxLength": 100 },
+        "country": { "type": "string", "maxLength": 100 },
+        "preferredCurrency": { "type": "string", "maxLength": 10 },
+        "monthlyIncome": { "type": "number" },
+        "monthlyEssentialExpenses": { "type": "number" },
+        "monthlySavingsGoal": { "type": "number" },
+        "emergencyAllocation": { "type": "number" },
+        "monthlyBudgetPeriod": { "type": "string", "maxLength": 50 },
+        "onboardingCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["displayName", "preferredCurrency", "monthlyIncome", "monthlyEssentialExpenses", "monthlySavingsGoal"]
+    },
+    "BudgetSummary": {
+      "title": "BudgetSummary",
+      "description": "Deterministic calculated budget snapshot",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "monthlyIncome": { "type": "number" },
+        "essentialExpenses": { "type": "number" },
+        "savingsTarget": { "type": "number" },
+        "emergencyAllocation": { "type": "number" },
+        "flexibleBudget": { "type": "number" },
+        "remainingFlexibleBudget": { "type": "number" },
+        "initialDailyAllowance": { "type": "number" },
+        "adaptiveDailyAllowance": { "type": "number" },
+        "totalExpenses": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "currency", "monthlyIncome", "flexibleBudget", "remainingFlexibleBudget"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Logged financial expense transaction",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 255 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 50 },
+        "date": { "type": "string", "maxLength": 30 },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 30 },
+        "source": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "isEssential": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "title", "amount", "currency", "category", "date"]
+    },
+    "SavingsGoal": {
+      "title": "SavingsGoal",
+      "description": "User targeted savings goal and recorded balance",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 120 },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "targetDate": { "type": "string", "maxLength": 30 },
+        "category": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "title", "targetAmount", "currentAmount"]
+    },
+    "PlannedPurchase": {
+      "title": "PlannedPurchase",
+      "description": "Prospective planned purchase evaluated by Purchase Impact Analyzer",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "itemName": { "type": "string", "maxLength": 120 },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 50 },
+        "priority": { "type": "string", "maxLength": 30 },
+        "affordabilityVerdict": { "type": "string", "maxLength": 50 },
+        "impactRemainingBudget": { "type": "number" },
+        "impactDailyAllowance": { "type": "number" },
+        "aiExplanation": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "itemName", "price", "currency", "affordabilityVerdict"]
+    },
+    "PayPalOrder": {
+      "title": "PayPalOrder",
+      "description": "Tracked PayPal Sandbox checkout order",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "orderId": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 100 },
+        "itemName": { "type": "string", "maxLength": 120 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "orderId", "amount", "currency", "status"]
+    },
+    "PaymentRecord": {
+      "title": "PaymentRecord",
+      "description": "Verified PayPal transaction capture and payment record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "orderId": { "type": "string", "maxLength": 128 },
+        "captureId": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "description": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "maxLength": 50 },
+        "source": { "type": "string", "maxLength": 30 },
+        "verified": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "orderId", "status", "amount", "currency", "verified"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile, budget parameters, and country/currency configuration"
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": "BudgetSummary",
+      "description": "User calculated monthly budget summary records"
+    },
+    "/users/{userId}/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "User logged expenses and purchase transactions"
+    },
+    "/users/{userId}/savingsGoals/{goalId}": {
+      "schema": "SavingsGoal",
+      "description": "User savings targets and tracked progress"
+    },
+    "/users/{userId}/plannedPurchases/{purchaseId}": {
+      "schema": "PlannedPurchase",
+      "description": "Evaluated planned purchases and affordability assessments"
+    },
+    "/users/{userId}/paypalOrders/{orderId}": {
+      "schema": "PayPalOrder",
+      "description": "Tracked PayPal Sandbox checkout orders"
+    },
+    "/users/{userId}/payments/{paymentId}": {
+      "schema": "PaymentRecord",
+      "description": "Verified captured PayPal payment records"
+    }
+  }
+}

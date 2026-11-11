@@ -1,0 +1,6 @@
+{
+  "name": "PennyWise AI",
+  "description": "An intelligent, friendly personal finance companion for managing monthly budgets, tracking expenses, calculating daily spending allowances, and evaluating purchases.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

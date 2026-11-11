@@ -1,0 +1,173 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all (Pillar 1)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Security Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Blueprint: UserProfile
+    function isValidUserProfile(data) {
+      return data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
+             data.preferredCurrency is string && data.preferredCurrency.size() >= 3 && data.preferredCurrency.size() <= 10 &&
+             data.monthlyIncome is number && data.monthlyIncome >= 0 &&
+             data.monthlyEssentialExpenses is number && data.monthlyEssentialExpenses >= 0 &&
+             data.monthlySavingsGoal is number && data.monthlySavingsGoal >= 0 &&
+             (!('country' in data) || (data.country is string && data.country.size() <= 100)) &&
+             (!('emergencyAllocation' in data) || (data.emergencyAllocation is number && data.emergencyAllocation >= 0));
+    }
+
+    // Validation Blueprint: BudgetSummary
+    function isValidBudgetSummary(data, userId) {
+      return data.userId == userId &&
+             data.currency is string && data.currency.size() >= 3 && data.currency.size() <= 10 &&
+             data.monthlyIncome is number && data.monthlyIncome >= 0 &&
+             data.flexibleBudget is number &&
+             data.remainingFlexibleBudget is number;
+    }
+
+    // Validation Blueprint: Expense
+    function isValidExpense(data, userId) {
+      return data.userId == userId &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 120 &&
+             data.amount is number && data.amount > 0 &&
+             data.currency is string && data.currency.size() >= 3 && data.currency.size() <= 10 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 50 &&
+             data.date is string && data.date.size() > 0 && data.date.size() <= 30 &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 30)) &&
+             (!('source' in data) || (data.source is string && data.source.size() <= 30));
+    }
+
+    // Validation Blueprint: SavingsGoal
+    function isValidSavingsGoal(data, userId) {
+      return data.userId == userId &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 120 &&
+             data.targetAmount is number && data.targetAmount > 0 &&
+             data.currentAmount is number && data.currentAmount >= 0 &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10));
+    }
+
+    // Validation Blueprint: PlannedPurchase
+    function isValidPlannedPurchase(data, userId) {
+      return data.userId == userId &&
+             data.itemName is string && data.itemName.size() > 0 && data.itemName.size() <= 120 &&
+             data.price is number && data.price > 0 &&
+             data.currency is string && data.currency.size() >= 3 && data.currency.size() <= 10 &&
+             data.affordabilityVerdict is string && data.affordabilityVerdict.size() <= 50;
+    }
+
+    // Validation Blueprint: PayPalOrder
+    function isValidPayPalOrder(data, userId) {
+      return data.userId == userId &&
+             data.orderId is string && data.orderId.size() > 0 && data.orderId.size() <= 128 &&
+             data.amount is number && data.amount > 0 &&
+             data.currency is string && data.currency.size() >= 3 && data.currency.size() <= 10 &&
+             data.status is string && data.status.size() <= 50;
+    }
+
+    // Validation Blueprint: PaymentRecord
+    function isValidPaymentRecord(data, userId) {
+      return data.userId == userId &&
+             data.orderId is string && data.orderId.size() > 0 && data.orderId.size() <= 128 &&
+             data.amount is number && data.amount > 0 &&
+             data.currency is string && data.currency.size() >= 3 && data.currency.size() <= 10 &&
+             data.status is string && data.status.size() <= 50 &&
+             data.verified is bool;
+    }
+
+    // User Resource Tree (Enforces strict ownership & partition)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false; // Blanket user listing forbidden
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
+      allow update: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
+      allow delete: if isValidId(userId) && isOwner(userId);
+
+      // Subcollection: Budgets
+      match /budgets/{budgetId} {
+        allow get: if isValidId(userId) && isValidId(budgetId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(budgetId) && isOwner(userId) && isValidBudgetSummary(incoming(), userId);
+        allow update: if isValidId(userId) && isValidId(budgetId) && isOwner(userId) && isValidBudgetSummary(incoming(), userId);
+        allow delete: if isValidId(userId) && isValidId(budgetId) && isOwner(userId);
+      }
+
+      // Subcollection: Expenses
+      match /expenses/{expenseId} {
+        allow get: if isValidId(userId) && isValidId(expenseId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(expenseId) && isOwner(userId) && isValidExpense(incoming(), userId);
+        
+        // Critical: Users cannot alter status of PayPal-originated verified transactions
+        allow update: if isValidId(userId) && isValidId(expenseId) && isOwner(userId) &&
+                         isValidExpense(incoming(), userId) &&
+                         (!('source' in existing()) || existing().source != 'PayPal' || incoming().status == existing().status);
+                         
+        allow delete: if isValidId(userId) && isValidId(expenseId) && isOwner(userId);
+      }
+
+      // Subcollection: Savings Goals
+      match /savingsGoals/{goalId} {
+        allow get: if isValidId(userId) && isValidId(goalId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(goalId) && isOwner(userId) && isValidSavingsGoal(incoming(), userId);
+        allow update: if isValidId(userId) && isValidId(goalId) && isOwner(userId) && isValidSavingsGoal(incoming(), userId);
+        allow delete: if isValidId(userId) && isValidId(goalId) && isOwner(userId);
+      }
+
+      // Subcollection: Planned Purchases (Purchase Analyzer assessments)
+      match /plannedPurchases/{purchaseId} {
+        allow get: if isValidId(userId) && isValidId(purchaseId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(purchaseId) && isOwner(userId) && isValidPlannedPurchase(incoming(), userId);
+        allow update: if isValidId(userId) && isValidId(purchaseId) && isOwner(userId) && isValidPlannedPurchase(incoming(), userId);
+        allow delete: if isValidId(userId) && isValidId(purchaseId) && isOwner(userId);
+      }
+
+      // Subcollection: PayPal Orders
+      match /paypalOrders/{orderId} {
+        allow get: if isValidId(userId) && isValidId(orderId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(orderId) && isOwner(userId) && isValidPayPalOrder(incoming(), userId);
+        allow update: if isValidId(userId) && isValidId(orderId) && isOwner(userId) && isValidPayPalOrder(incoming(), userId);
+        allow delete: if isValidId(userId) && isValidId(orderId) && isOwner(userId);
+      }
+
+      // Subcollection: Verified Payment Records
+      // Requirement: Prevent users from modifying verified PayPal payment statuses directly
+      match /payments/{paymentId} {
+        allow get: if isValidId(userId) && isValidId(paymentId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isValidId(paymentId) && isOwner(userId) && isValidPaymentRecord(incoming(), userId);
+        // Status and verification flag cannot be altered by client
+        allow update: if isValidId(userId) && isValidId(paymentId) && isOwner(userId) &&
+                         isValidPaymentRecord(incoming(), userId) &&
+                         incoming().status == existing().status &&
+                         incoming().verified == existing().verified;
+        allow delete: if false; // Verified financial payment records cannot be deleted by client
+      }
+    }
+  }
+}

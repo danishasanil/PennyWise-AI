@@ -47,10 +47,10 @@ export const AIAssistantView: React.FC = () => {
     )} (${budget.alerts?.atRiskOfMissingSavingsGoal ? 'Action recommended to protect target' : 'Protected and on track'})\n\nHow can I help you today? You can ask me if you can afford a purchase, explore cheaper alternatives, plan a savings goal, or evaluate where your money is going!`,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     suggestedFollowUps: [
-      `Can I afford a ${formatMoney(3000)} purchase?`,
-      'Suggest an alternative to buying a new phone',
-      `I want to save ${formatMoney(10000)}. Help me plan.`,
-      'Where am I spending the most?',
+      'Can I afford something today?',
+      'Suggest a cheaper alternative.',
+      'Help me save more this month.',
+      'Where is most of my money going?',
     ],
   });
 
@@ -251,10 +251,10 @@ export const AIAssistantView: React.FC = () => {
   const currentSuggestions = latestAiMessage?.suggestedFollowUps && latestAiMessage.suggestedFollowUps.length > 0
     ? latestAiMessage.suggestedFollowUps
     : [
-        'What is my daily spending allowance today?',
-        `Can I afford a ${formatMoney(3000)} purchase?`,
-        'Suggest an alternative to buying a new phone',
-        'Where am I spending the most?',
+        'Can I afford something today?',
+        'Suggest a cheaper alternative.',
+        'Help me save more this month.',
+        'Where is most of my money going?',
       ];
 
   return (

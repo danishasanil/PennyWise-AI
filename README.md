@@ -301,7 +301,7 @@ While PennyWise AI provides a complete end-to-end prototype for the hackathon, I
 
 ## 🎥 Demonstration
 
-- **Live Application URL**: `[Insert Hosted App URL Here]`
+- **Live Application URL**: `https://project-fdt5t-7vp37rbsi-danishasanil7-5897s-projects.vercel.app/`
 - **YouTube Video Walkthrough (Under 3 Minutes)**: `[Insert YouTube Video Link Here]`
 
 ---
